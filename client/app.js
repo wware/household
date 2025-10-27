@@ -729,16 +729,26 @@ const showProviderModal = async (providerId) => {
         }
 
         if (provider.address) {
+            // Auto-linkify URLs in address
+            const addressHtml = escapeHtml(provider.address)
+                .replace(/\n/g, '<br>')
+                .replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank">$1</a>');
+
             html += `<div class="modal-detail">
                 <span class="modal-label">Address:</span>
-                <span class="modal-value">${escapeHtml(provider.address).replace(/\n/g, '<br>')}</span>
+                <span class="modal-value">${addressHtml}</span>
             </div>`;
         }
 
         if (provider.info) {
+            // Auto-linkify URLs in info
+            const infoHtml = escapeHtml(provider.info)
+                .replace(/\n/g, '<br>')
+                .replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank">$1</a>');
+
             html += `<div class="modal-detail">
                 <span class="modal-label">Info:</span>
-                <span class="modal-value">${escapeHtml(provider.info).replace(/\n/g, '<br>')}</span>
+                <span class="modal-value">${infoHtml}</span>
             </div>`;
         }
 
