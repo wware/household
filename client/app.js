@@ -347,8 +347,9 @@ const loadData = async () => {
         state.tasks = await api.get("/api/tasks");
         state.appointments = await api.get("/api/appointments");
 
-        // Load items catalog
+        // Load items catalog and stores
         state.items = await api.get("/api/items");
+        state.stores = await api.get("/api/stores");
 
         // Grocery items require user_id parameter
         state.grocery = await api.get(`/api/grocery-items?user_id=${state.currentUser}`);
@@ -375,6 +376,7 @@ const loadData = async () => {
         renderWeather();
         renderTemplates();
         renderItemsDropdown();
+        renderStoreFilter();
 
         if (!calendar) {
             initializeCalendar();
@@ -666,12 +668,25 @@ const setupSettings = () => {
     }
 };
 
+// Store filter
+const setupStoreFilter = () => {
+    const storeFilter = document.getElementById("store-filter");
+    if (storeFilter) {
+        storeFilter.addEventListener("change", () => {
+            const selectedValue = storeFilter.value;
+            state.storeFilter = selectedValue ? parseInt(selectedValue) : null;
+            renderGrocery();
+        });
+    }
+};
+
 // Initialize
 document.addEventListener("DOMContentLoaded", () => {
     loadData();
     setupNavigation();
     setupForms();
     setupSettings();
+    setupStoreFilter();
 
     // Poll for updates every 10 seconds when tab is active
     document.addEventListener("visibilitychange", () => {

@@ -4,9 +4,34 @@ A shared AI assistant for household coordination, tracking groceries, appointmen
 
 ## Features
 
+- **Web Interface**: Responsive browser-based UI for desktop and mobile
+  - Intuitive navigation with tab-based sections
+  - Settings gear icon for admin access
+  - Auto-refresh every 10 seconds
+  - Works on Chrome and Firefox
+
 - **Grocery Management**: Track items, organize by store and section, create reusable templates
+  - Dropdown-based item selection with auto-fill quantities
+  - Store filter to see only items available at specific stores
+  - Template system for recurring grocery lists
+  - Mark items as purchased
+
 - **Appointments**: Schedule medical, pet, and other appointments
+  - Calendar view with FullCalendar integration
+  - Provider management with contact details
+  - Filter by user or patient name
+
 - **Tasks**: Manage household tasks with categories and assignments
+  - Categories: household, maintenance, shopping, personal, work, health
+  - Due dates and completion tracking
+  - Assign tasks to household members
+
+- **Admin Panel**: Centralized management interface
+  - Stores: Add/remove grocery stores
+  - Items: Manage item catalog with stores, sections, and default quantities
+  - Providers: Track medical/dental/vet provider information
+  - Templates: View and manage grocery list templates
+
 - **Multi-user**: Shared between household members with per-user preferences
 
 ## Project Structure
@@ -16,6 +41,11 @@ household/
 ├── schema.sql              # Database schema definition
 ├── DB_SCHEMA_DESIGN.md     # Database design documentation
 ├── requirements.txt        # Python dependencies
+├── client/                 # Web interface (HTML/CSS/JS)
+│   ├── index.html         # Main application UI
+│   ├── app.js             # Frontend JavaScript
+│   ├── admin.html         # Admin panel UI
+│   └── admin.js           # Admin panel JavaScript
 ├── server/                 # FastAPI server
 │   ├── __init__.py
 │   ├── main.py            # Main application entry point
@@ -26,6 +56,7 @@ household/
 │       ├── items.py
 │       ├── grocery_items.py
 │       ├── templates.py
+│       ├── providers.py
 │       ├── appointments.py
 │       └── tasks.py
 └── household.db           # SQLite database (created at runtime)
@@ -73,9 +104,10 @@ household/
 uvicorn server.main:app --reload --host 0.0.0.0 --port 3000
 ```
 
-The server will be available at:
-- API: http://localhost:3000
-- Interactive docs: http://localhost:3000/docs
+The application will be available at:
+- **Web UI**: http://localhost:3000 (main interface)
+- **Admin Panel**: http://localhost:3000/admin.html (or via settings gear icon)
+- API docs: http://localhost:3000/docs
 - Alternative docs: http://localhost:3000/redoc
 
 ## API Endpoints
@@ -137,14 +169,53 @@ The server will be available at:
 
 Visit http://localhost:3000/docs for interactive API documentation where you can test all endpoints.
 
+## Using the Web Interface
+
+### Main Interface (/)
+
+Navigate between sections using the top navigation bar:
+
+1. **Tasks**: Add and manage household tasks
+   - Enter task title and select category
+   - Mark tasks as complete
+   - View by category and due date
+
+2. **Appointments**: Schedule and track appointments
+   - Add title, date/time, and type
+   - Associate with providers (medical, dental, vet)
+   - View in list or calendar format
+
+3. **Calendar**: Visual calendar view of all appointments
+   - Month, week, and day views
+   - Click events for details
+
+4. **Grocery List**: Manage your shopping list
+   - Select items from dropdown (sorted alphabetically)
+   - Quantities auto-fill with defaults
+   - Filter by store (e.g., "only Trader Joe's items")
+   - Mark items as purchased
+   - Save lists as templates
+
+5. **Weather**: Weather information (coming soon)
+
+### Admin Panel (/admin.html)
+
+Access via the ⚙️ settings icon in the header → "Admin Panel"
+
+1. **Stores**: Add/remove grocery stores
+2. **Items**: Manage your item catalog
+   - Set default quantities and sections
+   - Assign items to specific stores
+3. **Providers**: Track medical/dental/vet provider contact info
+4. **Templates**: View and delete saved grocery list templates
+
 ## Future Enhancements
 
-- Multi-household support (each household has its own items)
-- User authentication
+- User authentication and profiles
 - Web search, trivia, weather integration
 - Philips Hue light control
-- Client web interface (static HTML/JS/CSS)
-- AWS deployment with docker-compose for prototyping
+- Multi-household support
+- AWS deployment with docker-compose
 
 ## License
 
