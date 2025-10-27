@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Household Assistant</title>
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css" rel="stylesheet" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+                'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+                sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        h1 {
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        .header-info {
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+
+        .settings-icon {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #7f8c8d;
+            transition: color 0.3s ease;
+            user-select: none;
+        }
+
+        .settings-icon:hover {
+            color: #3498db;
+        }
+
+        .settings-dropdown {
+            position: absolute;
+            top: 50px;
+            right: 20px;
+            background: white;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: none;
+            min-width: 150px;
+            z-index: 1000;
+        }
+
+        .settings-dropdown.active {
+            display: block;
+        }
+
+        .settings-dropdown a {
+            display: block;
+            padding: 12px 16px;
+            color: #2c3e50;
+            text-decoration: none;
+            transition: background 0.2s ease;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        .settings-dropdown a:last-child {
+            border-bottom: none;
+        }
+
+        .settings-dropdown a:hover {
+            background: #ecf0f1;
+        }
+
+        .nav-bar {
+            display: flex;
+            gap: 10px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            padding: 10px 20px;
+            border: none;
+            background: #ecf0f1;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background: #bdc3c7;
+        }
+
+        .nav-btn.active {
+            background: #3498db;
+            color: white;
+        }
+
+        .section {
+            display: none !important;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .section.active {
+            display: block !important;
+        }
+
+        /* FullCalendar Styles */
+        #calendar-section {
+            display: none !important;
+        }
+
+        #calendar-section.active {
+            display: flex !important;
+            flex-direction: column !important;
+            min-height: 600px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        input, select {
+            padding: 10px;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        input[type="text"], select {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        #grocery-store, #grocery-section {
+            flex: 0 1 140px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.3s ease;
+        }
+
+        button:hover {
+            background: #2980b9;
+        }
+
+        .item {
+            padding: 15px;
+            border: 1px solid #ecf0f1;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #fafafa;
+            transition: all 0.2s ease;
+        }
+
+        .item.completed {
+            opacity: 0.6;
+            background: #f0f0f0;
+        }
+
+        .item.completed .item-title {
+            text-decoration: line-through;
+            color: #95a5a6;
+        }
+
+        .item-content {
+            flex: 1;
+        }
+
+        .item-title {
+            font-weight: 500;
+            margin-bottom: 5px;
+            word-break: break-word;
+        }
+
+        .item-meta {
+            font-size: 13px;
+            color: #7f8c8d;
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 8px;
+            margin-left: 10px;
+            flex-shrink: 0;
+        }
+
+        .btn-complete, .btn-delete {
+            padding: 6px 12px;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        .btn-delete {
+            background: #e74c3c;
+        }
+
+        .btn-delete:hover {
+            background: #c0392b;
+        }
+
+        .btn-complete {
+            background: #27ae60;
+        }
+
+        .btn-complete:hover {
+            background: #229954;
+        }
+
+        .list {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        #calendar {
+            margin-top: 20px;
+            height: 100% !important;
+            min-height: 500px;
+        }
+
+        .weather-header {
+            margin-bottom: 20px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 15px;
+        }
+
+        .weather-updated {
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+
+        .weather-periods {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .weather-period {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 4px;
+            border-left: 4px solid #3498db;
+        }
+
+        .period-name {
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .period-temp {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .period-forecast {
+            font-size: 13px;
+            color: #555;
+            margin-bottom: 5px;
+        }
+
+        .period-wind {
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+
+        @media (max-width: 768px) {
+            .nav-bar {
+                flex-direction: column;
+            }
+
+            .nav-btn {
+                width: 100%;
+            }
+
+            .input-group {
+                flex-direction: column;
+            }
+
+            input[type="text"], select {
+                width: 100%;
+            }
+
+            .item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .item-actions {
+                margin-left: 0;
+                margin-top: 10px;
+                width: 100%;
+            }
+
+            .item-actions button {
+                flex: 1;
+            }
+
+            .weather-periods {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .fc {
+            font-size: 14px;
+        }
+
+        .fc-button-primary {
+            background-color: #3498db !important;
+            border-color: #3498db !important;
+        }
+
+        .fc-button-primary:not(:disabled).fc-button-active {
+            background-color: #2980b9 !important;
+            border-color: #2980b9 !important;
+        }
+
+        .fc-button-primary:not(:disabled):hover {
+            background-color: #2980b9 !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏠 Household Assistant</h1>
+            <div class="header-info">
+                Last updated: <span id="last-update">--:--:--</span>
+            </div>
+            <div class="settings-icon" id="settings-icon">⚙️</div>
+            <div class="settings-dropdown" id="settings-dropdown">
+                <a href="/admin.html">Admin Panel</a>
+            </div>
+        </header>
+
+        <div class="nav-bar">
+            <button class="nav-btn active" id="nav-tasks">Tasks</button>
+            <button class="nav-btn" id="nav-appointments">Appointments</button>
+            <button class="nav-btn" id="nav-calendar">Calendar</button>
+            <button class="nav-btn" id="nav-grocery">Grocery List</button>
+            <button class="nav-btn" id="nav-weather">Weather</button>
+        </div>
+
+        <!-- Tasks Section -->
+        <div id="tasks-section" class="section active">
+            <h2>📝 Tasks</h2>
+            <div class="input-group">
+                <input type="text" id="task-input" placeholder="Add a new task...">
+                <select id="task-category">
+                    <option value="other">Category</option>
+                    <option value="household">Household</option>
+                    <option value="maintenance">Maintenance</option>
+                    <option value="shopping">Shopping</option>
+                    <option value="personal">Personal</option>
+                    <option value="work">Work</option>
+                    <option value="health">Health</option>
+                </select>
+                <button id="add-task-btn">Add Task</button>
+            </div>
+            <div id="tasks-list" class="list"></div>
+        </div>
+
+        <!-- Appointments Section -->
+        <div id="appointments-section" class="section">
+            <h2>📅 Appointments</h2>
+            <div class="input-group">
+                <input type="text" id="appointment-input" placeholder="Appointment title...">
+                <input type="datetime-local" id="appointment-date">
+                <select id="appointment-type">
+                    <option value="other">Type</option>
+                    <option value="medical">Medical</option>
+                    <option value="dental">Dental</option>
+                    <option value="vet">Vet</option>
+                    <option value="work">Work</option>
+                    <option value="personal">Personal</option>
+                </select>
+                <button id="add-appointment-btn">Add Appointment</button>
+            </div>
+            <div id="appointments-list" class="list"></div>
+        </div>
+
+        <!-- Calendar Section -->
+        <div id="calendar-section" class="section">
+            <h2>📆 Calendar</h2>
+            <div id="calendar"></div>
+        </div>
+
+        <!-- Grocery Section -->
+        <div id="grocery-section" class="section">
+            <h2>🛒 Grocery List</h2>
+
+            <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+                <button id="toggle-templates-btn" style="background: #95a5a6;">Show Templates</button>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <label for="store-filter" style="font-size: 14px; color: #555;">Filter by store:</label>
+                    <select id="store-filter" style="padding: 8px 12px; border: 1px solid #bdc3c7; border-radius: 4px;">
+                        <option value="">All Stores</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="templates-panel" style="display: none; margin-bottom: 20px;">
+                <div style="padding: 15px; background: #f9f9f9; border-radius: 4px; border-left: 4px solid #27ae60; margin-bottom: 15px;">
+                    <h3 style="margin-top: 0; margin-bottom: 10px;">Quick Add from Template</h3>
+                    <div class="input-group">
+                        <select id="template-select">
+                            <option value="">-- Select a template --</option>
+                        </select>
+                        <button id="apply-template-btn" style="background: #27ae60;">Clone Template</button>
+                    </div>
+                </div>
+
+                <div style="padding: 15px; background: #f0f8ff; border-radius: 4px; border-left: 4px solid #3498db;">
+                    <h3 style="margin-top: 0; margin-bottom: 10px;">Save Current List as Template</h3>
+                    <div class="input-group">
+                        <input type="text" id="template-name-input" placeholder="Enter template name..." style="flex: 1;">
+                        <button id="save-template-btn" style="background: #3498db;">Save as Template</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <select id="grocery-item-select" style="flex: 2;">
+                    <option value="">-- Select an item --</option>
+                </select>
+                <input type="text" id="grocery-quantity" placeholder="Quantity (optional)" style="flex: 1;">
+                <button id="add-grocery-btn">Add to List</button>
+            </div>
+            <div style="margin-bottom: 10px; font-size: 13px; color: #7f8c8d;">
+                Don't see your item? <a href="/admin.html" style="color: #3498db;">Add it in the Admin Panel</a>
+            </div>
+            <div id="grocery-list" class="list"></div>
+        </div>
+
+        <!-- Weather Section -->
+        <div id="weather-section" class="section">
+            <h2>🌤️ Weather</h2>
+            <div id="weather-container"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+    <script src="/app.js"></script>
+</body>
+</html>

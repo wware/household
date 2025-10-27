@@ -4,8 +4,11 @@ Main FastAPI application for the Household AI Assistant.
 This is the entry point for the server. It sets up all routes and middleware.
 """
 
+from pathlib import Path
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from .routers import (
     stores, items, grocery_items, templates,
@@ -44,8 +47,13 @@ app.include_router(providers.router)
 app.include_router(appointments.router)
 app.include_router(tasks.router)
 
+# Mount static files (client directory)
+CLIENT_DIR = Path(__file__).parent.parent / "client"
+if CLIENT_DIR.exists():
+    app.mount("/", StaticFiles(directory=str(CLIENT_DIR), html=True), name="static")
 
-@app.get("/")
+
+@app.get("/api")
 def root():
     """Root endpoint with API information."""
     return {
