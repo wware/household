@@ -1,0 +1,1 @@
+"""Household AI Assistant Server."""
