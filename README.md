@@ -6,9 +6,10 @@ A shared AI assistant for household coordination, tracking groceries, appointmen
 
 - **Web Interface**: Responsive browser-based UI for desktop and mobile
   - Intuitive navigation with tab-based sections
-  - Settings gear icon for admin access
+  - Settings gear icon for admin access and API documentation
   - Auto-refresh every 10 seconds
   - Works on Chrome and Firefox
+  - Quick access to interactive API docs (Swagger & ReDoc)
 
 - **Grocery Management**: Track items, organize by store and section, create reusable templates
   - Dropdown-based item selection with auto-fill quantities
@@ -181,8 +182,10 @@ Navigate between sections using the top navigation bar:
    - View by category and due date
 
 2. **Appointments**: Schedule and track appointments
-   - Add title, date/time, and type
+   - Add title, date/time, type, and patient/client name
+   - Patient name prominently displayed (e.g., "Checkup - Will" or "Vet visit - Fluffy")
    - Associate with providers (medical, dental, vet)
+   - Click provider name to view contact details in modal (phone, email, address)
    - View in list or calendar format
 
 3. **Calendar**: Visual calendar view of all appointments

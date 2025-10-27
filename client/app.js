@@ -104,19 +104,33 @@ const renderAppointments = () => {
     if (!list) return;
 
     list.innerHTML = state.appointments
-        .map((apt) => `
-            <div class="item">
-                <div class="item-content">
-                    <div class="item-title">${escapeHtml(apt.title)}</div>
-                    <div class="item-meta">
-                        ${escapeHtml(apt.type || "other")} • ${formatDateTime(apt.date)}${apt.notes ? ` • ${escapeHtml(apt.notes)}` : ""}${apt.patient_name ? ` • Patient: ${escapeHtml(apt.patient_name)}` : ""}
+        .map((apt) => {
+            // Build title with patient name if present
+            let displayTitle = escapeHtml(apt.title);
+            if (apt.patient_name) {
+                displayTitle = `${escapeHtml(apt.title)} - ${escapeHtml(apt.patient_name)}`;
+            }
+
+            let providerInfo = '';
+            if (apt.provider) {
+                providerInfo = ` • <span class="provider-link" onclick="showProviderModal(${apt.provider.id})">${escapeHtml(apt.provider.name)}</span>`;
+            }
+
+            return `
+                <div class="item">
+                    <div class="item-content">
+                        <div class="item-title">${displayTitle}</div>
+                        <div class="item-meta">
+                            ${escapeHtml(apt.type || "other")} • ${formatDateTime(apt.date)}${providerInfo}
+                        </div>
+                        ${apt.notes ? `<div class="item-meta">Notes: ${escapeHtml(apt.notes)}</div>` : ""}
+                    </div>
+                    <div class="item-actions">
+                        <button class="btn-delete" onclick="deleteAppointment(${apt.id})">Delete</button>
                     </div>
                 </div>
-                <div class="item-actions">
-                    <button class="btn-delete" onclick="deleteAppointment(${apt.id})">Delete</button>
-                </div>
-            </div>
-        `)
+            `;
+        })
         .join("");
 };
 
@@ -508,6 +522,7 @@ const setupForms = () => {
     if (addAppointmentBtn) {
         addAppointmentBtn.addEventListener("click", async () => {
             const input = document.getElementById("appointment-input");
+            const patientInput = document.getElementById("appointment-patient");
             const date = document.getElementById("appointment-date");
             const type = document.getElementById("appointment-type");
 
@@ -517,9 +532,11 @@ const setupForms = () => {
                         title: input.value,
                         date: date.value,
                         type: type?.value || "other",
+                        patient_name: patientInput?.value.trim() || null,
                         created_by: state.currentUser,
                     });
                     input.value = "";
+                    patientInput.value = "";
                     date.value = "";
                     type.value = "";
                     await loadData();
@@ -680,6 +697,82 @@ const setupStoreFilter = () => {
     }
 };
 
+// Provider modal
+const showProviderModal = async (providerId) => {
+    try {
+        const provider = await api.get(`/api/providers/${providerId}`);
+
+        const modal = document.getElementById("provider-modal");
+        const modalBody = document.getElementById("modal-body");
+
+        let html = `<div class="modal-title">${escapeHtml(provider.name)}</div>`;
+
+        if (provider.phone) {
+            html += `<div class="modal-detail">
+                <span class="modal-label">Phone:</span>
+                <span class="modal-value"><a href="tel:${escapeHtml(provider.phone)}">${escapeHtml(provider.phone)}</a></span>
+            </div>`;
+        }
+
+        if (provider.email) {
+            html += `<div class="modal-detail">
+                <span class="modal-label">Email:</span>
+                <span class="modal-value"><a href="mailto:${escapeHtml(provider.email)}">${escapeHtml(provider.email)}</a></span>
+            </div>`;
+        }
+
+        if (provider.website) {
+            html += `<div class="modal-detail">
+                <span class="modal-label">Website:</span>
+                <span class="modal-value"><a href="${escapeHtml(provider.website)}" target="_blank">${escapeHtml(provider.website)}</a></span>
+            </div>`;
+        }
+
+        if (provider.address) {
+            html += `<div class="modal-detail">
+                <span class="modal-label">Address:</span>
+                <span class="modal-value">${escapeHtml(provider.address).replace(/\n/g, '<br>')}</span>
+            </div>`;
+        }
+
+        if (provider.info) {
+            html += `<div class="modal-detail">
+                <span class="modal-label">Info:</span>
+                <span class="modal-value">${escapeHtml(provider.info).replace(/\n/g, '<br>')}</span>
+            </div>`;
+        }
+
+        modalBody.innerHTML = html;
+        modal.classList.add("active");
+    } catch (error) {
+        console.error("Failed to load provider:", error);
+        alert("Failed to load provider information.");
+    }
+};
+
+const setupProviderModal = () => {
+    const modal = document.getElementById("provider-modal");
+    const modalClose = document.getElementById("modal-close");
+
+    if (modalClose) {
+        modalClose.addEventListener("click", () => {
+            modal.classList.remove("active");
+        });
+    }
+
+    // Close modal when clicking outside
+    if (modal) {
+        modal.addEventListener("click", (e) => {
+            if (e.target === modal) {
+                modal.classList.remove("active");
+            }
+        });
+    }
+};
+
+// Attach to window for HTML onclick handlers
+window.showProviderModal = showProviderModal;
+
 // Initialize
 document.addEventListener("DOMContentLoaded", () => {
     loadData();
@@ -687,6 +780,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setupForms();
     setupSettings();
     setupStoreFilter();
+    setupProviderModal();
 
     // Poll for updates every 10 seconds when tab is active
     document.addEventListener("visibilitychange", () => {
